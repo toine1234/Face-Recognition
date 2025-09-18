@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Face Recognition Demo</title>
+</head>
+<body>
+  <h1>Face Recognition Demo</h1>
+
+  <h2>Upload ảnh</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" id="file">
+    <button type="submit">Upload</button>
+  </form>
+  <p id="result-upload"></p>
+
+  <h2>Nhận diện bằng webcam</h2>
+  <video id="video" width="320" height="240" autoplay></video>
+  <button id="capture">Chụp & Nhận diện</button>
+  <p id="result-webcam"></p>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
