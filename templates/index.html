@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 9.5vh; /* Sử dụng viewport height để linh hoạt hơn */
+            background-color: rgb(20, 20, 60);
+            color: white;
+            display: flex; /* Dùng flexbox để căn giữa dễ dàng */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .workspace {
+            width: 99%;
+            min-height: 80vh; /* Sử dụng min-height để nội dung không bị cắt */
+            background-color: rgb(215, 209, 226);
+            margin: 10px auto; /* Căn giữa và tạo khoảng cách */
+            border-radius: 2px;
+            padding: 20px;
+            box-sizing: border-box; /* Đảm bảo padding không làm thay đổi kích thước */
+        }
+        
+        .header {
+            font-size: 2em; /* Kích thước font linh hoạt */
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        button, .button1 {
+            width: 200px;
+            height: 50px;
+            border-radius: 10px;
+            border: 3px solid rgb(67, 12, 247);
+            color: white;
+            font-size: large;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        button {
+            background-color: rgba(19, 196, 57, 0.73);
+        }
+
+        .button1 {
+            background-color: rgba(213, 33, 33, 0.73);
+            border-color: rgb(255, 0, 0);
+        }
+
+        button:hover {
+            background-color: rgb(0, 255, 81);
+            border-color: rgb(13, 13, 203);
+        }
+
+        .button1:hover {
+            background-color: rgb(255, 0, 0);
+            border-color: rgb(13, 13, 203);
+        }
+
+        .footer {
+            background-color: rgb(11, 11, 53);
+            color: white;
+            border-radius: 3px;
+            padding: 10px 20px;
+            text-align: center;
+            margin-top: 25%;
+        }
+    </style>
+</head>
+<body>
+    {% include "header.html" %}
+    <div class="workspace">
+        <div class="header">
+            <header>
+                DETECT THE FACES IN FRAME
+            </header>
+        </div>    
+        <div class="btn">
+            <form action="{{ url_for('video_feed') }}" method="get">
+                <label>Start Detection: </label>
+                <button type="submit">START</button>
+            </form>
+        </div>
+        <div id="video_stream" style="text-align: center; margin-top: 20px;">
+            <img id="video_frame" src="" width="640" height="480" />
+        </div>
+        <div class="footer">
+            <footer>
+                @GECM Hassan Team no:15<br>
+                Team members:<br>
+                PRAKASH G (4HG20CS016),
+                H M MANURAJA (4HG21CS407),
+                VINAY A (4HG20CS032),
+                SACHIN T P (4HG20CS021),
+                DARSHAN N B (4HG21CS406)
+            </footer>
+        </div>
+    </div>     
+</body>
+</html>
