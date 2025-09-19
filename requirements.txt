@@ -4,5 +4,6 @@ numpy
 Pillow
 mtcnn
 flask
-cv2
 opencv-python
+imutils
+scikit-learn
