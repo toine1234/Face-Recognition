@@ -29,4 +29,8 @@ data = {"encodings": known_encodings, "names": known_names}
 with open('encodings/face_encodings.pkl', 'wb') as f:
     pickle.dump(data, f)
 
-print("✅ Training complete, encodings saved to face_encodings.pkl")
+print("✅ Training complete, encodings saved to folder encodings")
+
+boxes = face_recognition.face_locations(rgb, model="hog")
+if len(boxes) == 0:
+    print(f"[!] Không tìm thấy mặt trong {image_path}, bỏ qua")
