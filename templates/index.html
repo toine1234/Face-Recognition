@@ -1,108 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Face Recognition System</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-
-<div class="container py-4">
-    <h1 class="text-center mb-4">👤 Face Recognition Demo</h1>
-
-    <!-- Livestream video -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">Webcam Livestream (Server)</div>
-        <div class="card-body text-center">
-            <img src="{{ url_for('video_feed') }}" width="640" height="480" class="img-fluid rounded border">
+  <head>
+    <meta charset="utf-8">
+    <title>Điểm danh FaceID</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="container py-4">
+      <h2 class="mb-3">🎥 Camera điểm danh</h2>
+      <div class="row">
+        <div class="col-md-8">
+          <img src="{{ url_for('video_feed') }}" width="100%" class="rounded shadow">
         </div>
+        <div class="col-md-4">
+          <h4>📋 Danh sách điểm danh</h4>
+          <ul id="log" class="list-group"></ul>
+        </div>
+      </div>
     </div>
 
-    <!-- Upload ảnh -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">Upload Ảnh để Nhận diện</div>
-        <div class="card-body">
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <input type="file" name="file" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-success">Nhận diện</button>
-            </form>
-            <div id="uploadResult" class="mt-3 alert d-none"></div>
-        </div>
-    </div>
-
-    <!-- Chụp ảnh từ Webcam (Client-side) -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-info text-white">Chụp ảnh từ Webcam (Client)</div>
-        <div class="card-body text-center">
-            <video id="webcamVideo" width="640" height="480" autoplay class="rounded border"></video>
-            <br><br>
-            <button id="captureBtn" class="btn btn-info">📸 Chụp & Nhận diện</button>
-            <div id="webcamResult" class="mt-3 alert d-none"></div>
-        </div>
-    </div>
-
-    <!-- Validate -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning text-dark">Validation</div>
-        <div class="card-body">
-            <button id="validateBtn" class="btn btn-warning">Chạy Validation</button>
-            <div id="validateResult" class="mt-3 alert d-none"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Bootstrap JS + Axios -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-<script>
-    // Upload ảnh
-    document.getElementById("uploadForm").addEventListener("submit", function(e){
-        e.preventDefault();
-        let formData = new FormData(this);
-
-        axios.post("/upload", formData).then(res => {
-            let resultDiv = document.getElementById("uploadResult");
-            resultDiv.className = "mt-3 alert alert-success";
-            resultDiv.innerText = "Khuôn mặt nhận diện: " + res.data.name;
-        }).catch(err => {
-            let resultDiv = document.getElementById("uploadResult");
-            resultDiv.className = "mt-3 alert alert-danger";
-            resultDiv.innerText = err.response?.data?.message || "Lỗi nhận diện!";
-        });
-    });
-
-    // Webcam (client-side)
-    const video = document.getElementById("webcamVideo");
-    const captureBtn = document.getElementById("captureBtn");
-
-    // Yêu cầu quyền truy cập webcam
-    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        video.srcObject = stream;
-    }).catch(err => {
-        console.error("Không thể truy cập webcam:", err);
-    });
-
-    captureBtn.addEventListener("click", function(){
-        let canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-
-        let imgData = canvas.toDataURL("image/jpeg");
-        axios.post("/webcam", { image: imgData }).then(res => {
-            let resultDiv = document.getElementById("webcamResult");
-            resultDiv.className = "mt-3 alert alert-success";
-            resultDiv.innerText = "Khuôn mặt nhận diện: " + res.data.name;
-        }).catch(err => {
-            let resultDiv = document.getElementById("webcamResult");
-            resultDiv.className = "mt-3 alert alert-danger";
-            resultDiv.innerText = err.response?.data?.message || "Lỗi nhận diện!";
-        });
-    });
-</script>
-
-</body>
+    <script>
+      async function loadAttendance() {
+        let res = await fetch('/attendance');
+        let data = await res.json();
+        let log = document.getElementById('log');
+        log.innerHTML = "";
+        for (const [name, time] of Object.entries(data)) {
+          let li = document.createElement("li");
+          li.className = "list-group-item";
+          li.textContent = `${name} - ${time}`;
+          log.appendChild(li);
+        }
+      }
+      setInterval(loadAttendance, 2000);
+    </script>
+  </body>
 </html>
