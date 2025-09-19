@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response, jsonify
 import cv2, os, pickle, face_recognition, numpy as np
 from datetime import datetime
+import csv
 
 app = Flask(__name__)
 
@@ -13,12 +14,41 @@ else:
 
 TOLERANCE = data.get("tolerance", 0.4)
 
-attendance_log = {}
-seen_counter = {}
+attendance_log = {}   # lưu tạm thời để hiển thị trên web
+seen_counter = {}     # đếm số lần liên tiếp
+
+CSV_FILE = "attendance.csv"
+
+# Hàm ghi điểm danh vào CSV
+def save_to_csv(name):
+    today = datetime.now().strftime("%Y-%m-%d")
+    time_now = datetime.now().strftime("%H:%M:%S")
+
+    # Nếu file chưa có thì tạo với header
+    if not os.path.exists(CSV_FILE):
+        with open(CSV_FILE, mode="w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Name", "Date", "Time"])
+
+    # Kiểm tra đã ghi hôm nay chưa
+    already_marked = False
+    with open(CSV_FILE, mode="r") as f:
+        for row in csv.reader(f):
+            if row and row[0] == name and row[1] == today:
+                already_marked = True
+                break
+
+    if not already_marked:
+        with open(CSV_FILE, mode="a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([name, today, time_now])
+        print(f"📌 Đã lưu điểm danh: {name} - {today} {time_now}")
 
 def mark_attendance(name):
     if name != "Unknown":
-        attendance_log[name] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        attendance_log[name] = now
+        save_to_csv(name)
 
 def generate_frames():
     cap = cv2.VideoCapture(0)
@@ -30,14 +60,14 @@ def generate_frames():
             break
 
         frame_count += 1
-        if frame_count % 3 != 0:  # bỏ bớt frame giảm lag
+        if frame_count % 5 != 0:  # skip frame để giảm lag
             continue
 
-        # Resize frame nhỏ để xử lý nhanh hơn
+        # Resize frame để xử lý nhanh hơn
         small_frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)
         rgb = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
-        boxes = face_recognition.face_locations(rgb, model="cnn")
+        boxes = face_recognition.face_locations(rgb, model="hog")
         encs = face_recognition.face_encodings(rgb, boxes)
 
         for (top, right, bottom, left), encoding in zip(boxes, encs):
@@ -49,13 +79,13 @@ def generate_frames():
                 idx = np.argmin(distances)
                 name = data["names"][idx]
 
-            # Đếm liên tiếp để điểm danh chắc chắn
+            # Đếm liên tiếp để chắc chắn
             seen_counter[name] = seen_counter.get(name, 0) + 1
             if seen_counter[name] >= 3:
                 mark_attendance(name)
                 seen_counter[name] = 0
 
-            # Scale lại box theo frame gốc
+            # Scale box về size gốc
             top, right, bottom, left = [v*2 for v in (top, right, bottom, left)]
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 200, 0), 2)
             cv2.putText(frame, name, (left, top - 10),
